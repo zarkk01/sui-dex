@@ -27,3 +27,15 @@ public fun lock<T: key + store>(obj: T, ctx: &mut TxContext): (Locked<T>, Key) {
 
     (locked, key)
 }
+
+public fun unlock<T: key + store>(mut locked: Locked<T>, key: Key, ctx: &mut TxContext): T {
+    assert!(object::id(&key) == locked.key);
+    let Key { id } = key;
+    id.delete();
+
+    let obj = dof::remove(&mut locked.id, LockedObjectKey {});
+
+    let Locked { id, key: _ } = locked;
+    id.delete();
+    (obj)
+}
